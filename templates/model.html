@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IDS · Model Info</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --panel: #f1f5f9;
+            --border: #94a3b8;
+            --accent: #0ea5e9;
+            --accent2: #ef4444;
+            --warn: #f59e0b;
+            --success: #10b981;
+            --text: #000000;
+            --muted: #1e293b;
+            --mono: 'Share Tech Mono', monospace;
+            --body: 'Exo 2', sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--body);
+            font-weight: 500;
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: 56px 1fr auto;
+            grid-template-columns: 220px 1fr;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(rgba(14, 165, 233, .05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(14, 165, 233, .05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* HEADER */
+        header {
+            grid-column: 1/-1;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .logo-text {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--accent);
+            letter-spacing: 3px;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 4px;
+            margin-left: 24px;
+        }
+
+        .nav-link {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 6px 14px;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            transition: all .2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--accent);
+            border-color: var(--border);
+            background: rgba(0, 212, 255, .04);
+        }
+
+        .header-sep {
+            flex: 1;
+        }
+
+        #statusBadge {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            padding: 4px 12px;
+            border: 1px solid var(--muted);
+            color: var(--muted);
+            transition: all .3s;
+        }
+
+        #statusBadge.running {
+            border-color: var(--success);
+            color: var(--success);
+            box-shadow: 0 0 8px rgba(0, 230, 118, .2);
+        }
+
+        .header-user {
+            font-size: 13px;
+            color: var(--muted);
+            margin-left: 16px;
+        }
+
+        .header-user span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all .2s;
+            margin-left: 12px;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 18px;
+            padding: 5px 10px;
+            cursor: pointer;
+            line-height: 1;
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+
+        .hamburger-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* DRAWER */
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            z-index: 200;
+            backdrop-filter: blur(2px);
+        }
+
+        .drawer-overlay.open {
+            display: block;
+        }
+
+        .right-drawer {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 260px;
+            height: 100vh;
+            background: var(--surface);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 24px 20px;
+            z-index: 300;
+            transition: right .3s ease;
+            overflow-y: auto;
+        }
+
+        .right-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .drawer-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+            transition: color .2s;
+        }
+
+        .drawer-close:hover {
+            color: var(--accent2);
+        }
+
+        .drawer-status-row {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #drawerStatusBadge {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            padding: 3px 10px;
+            border: 1px solid var(--muted);
+            color: var(--muted);
+            transition: all .3s;
+        }
+
+        #drawerStatusBadge.running {
+            border-color: var(--success);
+            color: var(--success);
+            box-shadow: 0 0 8px rgba(0, 230, 118, .2);
+        }
+
+        .drawer-user-row {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .drawer-user-row span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .drawer-divider {
+            height: 1px;
+            background: var(--border);
+        }
+
+        .drawer-logout-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 9px 14px;
+            cursor: pointer;
+            transition: all .2s;
+            text-align: left;
+        }
+
+        .drawer-logout-btn:hover {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        /* SIDEBAR */
+        aside {
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            grid-row: 2;
+        }
+
+        .sidebar-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--muted);
+            padding: 0 20px 8px;
+            text-transform: uppercase;
+        }
+
+        .ctrl-btn {
+            margin: 4px 16px;
+            padding: 11px 16px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all .2s;
+        }
+
+        .ctrl-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .ctrl-btn.start:hover {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .ctrl-btn.stop:hover {
+            border-color: var(--accent2);
+            color: var(--accent2);
+        }
+
+        .ctrl-btn .icon {
+            font-size: 16px;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 12px 16px;
+        }
+
+        /* MAIN */
+        main {
+            padding: 24px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            grid-row: 2;
+            min-width: 0;
+            overflow-x: hidden;
+        }
+
+        /* SECTION HEADER */
+        .section-hdr {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-family: var(--mono);
+        }
+
+        .section-sub {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        /* FADE-IN ANIMATION */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp .5s ease both;
+        }
+
+        .fade-in:nth-child(1) {
+            animation-delay: .05s
+        }
+
+        .fade-in:nth-child(2) {
+            animation-delay: .1s
+        }
+
+        .fade-in:nth-child(3) {
+            animation-delay: .15s
+        }
+
+        .fade-in:nth-child(4) {
+            animation-delay: .2s
+        }
+
+        /* MODEL OVERVIEW CARD */
+        .overview-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 24px 28px;
+            line-height: 1.8;
+            font-size: 14px;
+            color: var(--text);
+            transition: box-shadow .2s;
+        }
+
+        .overview-card:hover {
+            box-shadow: 0 0 24px rgba(0, 212, 255, .07);
+        }
+
+        /* TECHNIQUES GRID */
+        .techniques-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .tech-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--accent);
+            padding: 20px;
+            transition: box-shadow .2s, border-top-color .2s;
+        }
+
+        .tech-card:hover {
+            box-shadow: 0 0 20px rgba(0, 212, 255, .09);
+            border-top-color: var(--accent);
+        }
+
+        .tech-card:nth-child(2) {
+            border-top-color: #a78bfa;
+        }
+
+        .tech-card:nth-child(3) {
+            border-top-color: var(--success);
+        }
+
+        .tech-card:nth-child(4) {
+            border-top-color: var(--warn);
+        }
+
+        .tech-icon {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .tech-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .tech-card:nth-child(2) .tech-name {
+            color: #a78bfa;
+        }
+
+        .tech-card:nth-child(3) .tech-name {
+            color: var(--success);
+        }
+
+        .tech-card:nth-child(4) .tech-name {
+            color: var(--warn);
+        }
+
+        .tech-desc {
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.65;
+            opacity: .9;
+        }
+
+        /* METRICS */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--accent);
+            padding: 18px 20px;
+            position: relative;
+            transition: box-shadow .2s;
+            cursor: default;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 0 22px rgba(0, 212, 255, .1);
+        }
+
+        .metric-card.prec {
+            border-top-color: #a78bfa;
+        }
+
+        .metric-card.rec {
+            border-top-color: var(--success);
+        }
+
+        .metric-card.f1 {
+            border-top-color: var(--warn);
+        }
+
+        .metric-icon {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .metric-label {
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metric-value {
+            font-size: 30px;
+            font-weight: 700;
+            font-family: var(--mono);
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .metric-card.prec .metric-value {
+            color: #a78bfa;
+        }
+
+        .metric-card.rec .metric-value {
+            color: var(--success);
+        }
+
+        .metric-card.f1 .metric-value {
+            color: var(--warn);
+        }
+
+        .metric-sub {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* TOOLTIP */
+        .tip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid var(--muted);
+            color: var(--muted);
+            font-size: 9px;
+            cursor: help;
+            font-family: var(--mono);
+            position: relative;
+        }
+
+        .tip-icon:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 10px;
+            letter-spacing: .5px;
+            white-space: nowrap;
+            padding: 5px 10px;
+            z-index: 50;
+            pointer-events: none;
+            font-family: var(--mono);
+        }
+
+        /* METRICS NOTE */
+        .metrics-note {
+            background: rgba(0, 212, 255, .04);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--muted);
+            padding: 12px 18px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: .3px;
+            margin-top: 12px;
+        }
+
+        /* VISUALIZATIONS */
+        .viz-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .viz-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: box-shadow .2s;
+        }
+
+        .viz-card:hover {
+            box-shadow: 0 0 22px rgba(0, 212, 255, .07);
+        }
+
+        .viz-card-title {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .viz-img-wrap {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            width: 100%;
+        }
+
+        .viz-img-wrap img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+        .viz-img-wrap .img-placeholder {
+            color: var(--muted);
+            font-family: var(--mono);
+            font-size: 11px;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .viz-caption-title {
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .viz-caption-desc {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.6;
+            margin-top: 4px;
+        }
+
+        /* VIZ SECTION DESC */
+        .viz-desc {
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-left: 2px solid var(--border);
+        }
+
+        /* DATASET DETAILS */
+        .dataset-intro {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--success);
+            padding: 20px 24px;
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.75;
+            margin-bottom: 16px;
+            transition: box-shadow .2s;
+        }
+
+        .dataset-intro:hover {
+            box-shadow: 0 0 20px rgba(0, 230, 118, .06);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 4px;
+        }
+
+        .feature-cat {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-top: 2px solid var(--accent);
+            padding: 16px 18px;
+            transition: box-shadow .2s;
+        }
+
+        .feature-cat:nth-child(2) {
+            border-top-color: var(--warn);
+        }
+
+        .feature-cat:nth-child(3) {
+            border-top-color: #a78bfa;
+        }
+
+        .feature-cat:hover {
+            box-shadow: 0 0 18px rgba(0, 212, 255, .07);
+        }
+
+        .fcat-name {
+            font-family: var(--mono);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .feature-cat:nth-child(2) .fcat-name {
+            color: var(--warn);
+        }
+
+        .feature-cat:nth-child(3) .fcat-name {
+            color: #a78bfa;
+        }
+
+        .fcat-desc {
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.65;
+            opacity: .9;
+        }
+
+        .imbalance-note {
+            background: rgba(239, 68, 68, .04);
+            border: 1px solid rgba(239, 68, 68, .2);
+            border-left: 3px solid var(--accent2);
+            padding: 14px 18px;
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.7;
+        }
+
+        .imbalance-note strong {
+            color: var(--accent2);
+            font-family: var(--mono);
+        }
+
+        /* FOOTER */
+        footer {
+            grid-column: 1/-1;
+            background: var(--panel);
+            border-top: 1px solid var(--border);
+            padding: 16px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 600px) {
+            footer {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+                gap: 16px;
+            }
+        }
+
+        .footer-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 530;
+            color: var(--muted);
+        }
+
+        .footer-name span {
+            color: var(--accent);
+        }
+
+        .footer-tagline {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--muted);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .footer-links a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 18px;
+            transition: color .2s, transform .2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .footer-links svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:768px) {
+            body {
+                grid-template-rows: 56px auto 1fr auto;
+                grid-template-columns: 1fr;
+            }
+
+            .hamburger-btn {
+                display: block;
+            }
+
+            #statusBadge,
+            .header-user,
+            .btn-logout {
+                display: none;
+            }
+
+            .header-nav {
+                margin-left: 8px;
+            }
+
+            /* aside {
+                grid-row: 2;
+                grid-column: 1;
+                flex-direction: row;
+                flex-wrap: wrap;
+                padding: 12px 16px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            } */
+
+            .sidebar-label,
+            .sidebar-divider {
+                display: none;
+            }
+
+            .ctrl-btn {
+                margin: 4px;
+                flex: 1;
+                min-width: 130px;
+                justify-content: center;
+            }
+
+            main {
+                grid-row: 3;
+                padding: 16px;
+            }
+
+            footer {
+                grid-row: 4;
+            }
+
+            .metrics-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .techniques-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .viz-row {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media(max-width:480px) {
+            .metrics-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header-nav {
+                display: none;
+            }
+
+            .metric-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo-text">⬡ NetGuard</div>
+        <nav class="header-nav">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+            <a class="nav-link active" href="/model">Model</a>
+        </nav>
+        <div class="header-sep"></div>
+        <div id="statusBadge">● IDLE</div>
+        <div class="header-user">Operator: <span>{{ username }}</span></div>
+        <button class="btn-logout" onclick="doLogout()">LOGOUT</button>
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="openDrawer()" aria-label="Open menu">☰</button>
+    </header>
+
+    <!-- DRAWER OVERLAY -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+    <!-- RIGHT DRAWER -->
+    <div class="right-drawer" id="rightDrawer" role="dialog" aria-label="Navigation menu">
+        <div class="drawer-header-label">⬡ NetGuard</div>
+        <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">✕</button>
+        <div class="drawer-status-row">Status: <span id="drawerStatusBadge">● IDLE</span></div>
+        <div class="drawer-user-row">Operator: <span>{{ username }}</span></div>
+        <div class="drawer-divider"></div>
+        <button class="drawer-logout-btn" onclick="doLogout()">⏻ &nbsp;LOGOUT</button>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+
+        <!-- 1. MODEL OVERVIEW -->
+        <div class="fade-in">
+            <div class="section-hdr">
+                <div class="section-title">⊕ Model Overview</div>
+                <div class="section-sub">Random Forest · NSL-KDD · Multi-class Classification</div>
+            </div>
+            <div class="overview-card">
+                This Intrusion Detection System (IDS) is built using a <strong style="color:var(--accent)">Random Forest
+                    Classifier</strong>,
+                designed to identify and classify network traffic into normal or malicious categories. The system
+                performs
+                <strong style="color:var(--accent)">multi-class classification</strong>, detecting various types of
+                attacks including
+                DoS, Probe, R2L, and U2R along with normal traffic. It is trained on the
+                <strong style="color:var(--accent)">NSL-KDD dataset</strong>, a refined version of the KDD'99 dataset,
+                which eliminates redundancy and provides a more balanced benchmark for evaluating intrusion detection
+                models.
+                The primary goal of this model is to enable accurate and real-time detection of network threats in a
+                simulated environment.
+            </div>
+        </div>
+
+        <!-- 2. TECHNIQUES & PROCESSING -->
+        <div class="fade-in">
+            <div class="section-hdr">
+                <div class="section-title">⚙ Techniques &amp; Processing</div>
+                <div class="section-sub">Data pipeline · Feature engineering · Real-time inference</div>
+            </div>
+            <div class="techniques-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">🔢</div>
+                    <div class="tech-name">One-Hot Encoding</div>
+                    <div class="tech-desc">Categorical features such as protocol type, service, and flag are converted
+                        into numerical format using One-Hot Encoding, allowing the machine learning model to process
+                        them effectively without introducing ordinal bias.</div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">⚖</div>
+                    <div class="tech-name">SMOTE — Synthetic Minority Over-sampling</div>
+                    <div class="tech-desc">To address class imbalance in the dataset, especially for rare attack types
+                        like U2R and R2L, SMOTE is applied to generate synthetic samples, improving the model's ability
+                        to detect minority class attacks.</div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">📡</div>
+                    <div class="tech-name">Feature Extraction</div>
+                    <div class="tech-desc">The system extracts real-time network flow features such as count,
+                        same_srv_rate, dst_host_count, and packet statistics. These features help capture both
+                        short-term and host-level traffic behavior.</div>
+                </div>
+                <div class="tech-card">
+                    <div class="tech-icon">⚡</div>
+                    <div class="tech-name">Real-Time Prediction &amp; Logging</div>
+                    <div class="tech-desc">Captured network flows are processed in real-time, passed through the trained
+                        model for classification, and the results are logged into the system database for monitoring and
+                        analysis.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. MODEL PERFORMANCE METRICS -->
+        <div class="fade-in">
+            <div class="section-hdr">
+                <div class="section-title">🎯 Model Performance Metrics</div>
+                <div class="section-sub">Weighted Metrics · NSL-KDD · Random Forest</div>
+            </div>
+            <div class="metrics-row">
+                <div class="metric-card">
+                    <div class="metric-icon">🎯</div>
+                    <div class="metric-label">
+                        Accuracy
+                        <span class="tip-icon" data-tip="Percentage of total correct predictions">?</span>
+                    </div>
+                    <div class="metric-value">75.8%</div>
+                    <div class="metric-sub">Overall correct predictions</div>
+                </div>
+                <div class="metric-card prec">
+                    <div class="metric-icon">🔬</div>
+                    <div class="metric-label">
+                        Precision (Weighted)
+                        <span class="tip-icon" data-tip="How many predicted attacks were actually attacks">?</span>
+                    </div>
+                    <div class="metric-value">76%</div>
+                    <div class="metric-sub">True pos. / (True + False pos.)</div>
+                </div>
+                <div class="metric-card rec">
+                    <div class="metric-icon">📡</div>
+                    <div class="metric-label">
+                        Recall (Weighted)
+                        <span class="tip-icon" data-tip="How many actual attacks were correctly detected">?</span>
+                    </div>
+                    <div class="metric-value">82%</div>
+                    <div class="metric-sub">True pos. / (True pos. + False neg.)</div>
+                </div>
+                <div class="metric-card f1">
+                    <div class="metric-icon">⚖</div>
+                    <div class="metric-label">
+                        F1-Score (Weighted)
+                        <span class="tip-icon" data-tip="Balance between precision and recall">?</span>
+                    </div>
+                    <div class="metric-value">73%</div>
+                    <div class="metric-sub">Harmonic mean of Precision &amp; Recall</div>
+                </div>
+            </div>
+            <div class="metrics-note">
+                ℹ These metrics represent the overall performance of the trained model on the NSL-KDD dataset using
+                weighted averaging to account for class imbalance.
+            </div>
+        </div>
+
+        <!-- 4. MODEL VISUALIZATIONS -->
+        <div class="fade-in">
+            <div class="section-hdr">
+                <div class="section-title">📊 Model Visualizations</div>
+            </div>
+            <div class="viz-desc">
+                The following visualizations provide insights into the model's performance and the dataset distribution,
+                helping to better understand classification behavior and data imbalance.
+            </div>
+            <div class="viz-row">
+                <div class="viz-card">
+                    <div class="viz-card-title">⬡ Confusion Matrix</div>
+                    <div class="viz-img-wrap">
+                        <img src="{{ url_for('static', filename='charts/confusion_matrix.png') }}"
+                            alt="Confusion Matrix"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                        <div class="img-placeholder" style="display:none;">[ confusion_matrix.png ]<br />Place in
+                            static/charts/</div>
+                    </div>
+                    <div>
+                        <div class="viz-caption-title">Confusion Matrix</div>
+                        <div class="viz-caption-desc">Displays the comparison between actual and predicted classes,
+                            highlighting how well the model distinguishes between different types of network traffic.
+                        </div>
+                    </div>
+                </div>
+                <div class="viz-card">
+                    <div class="viz-card-title">⬡ Class Distribution</div>
+                    <div class="viz-img-wrap">
+                        <img src="{{ url_for('static', filename='charts/attack_type.png') }}" alt="Class Distribution"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                        <div class="img-placeholder" style="display:none;">[ attack_type.png ]<br />Place in
+                            static/charts/</div>
+                    </div>
+                    <div>
+                        <div class="viz-caption-title">Class Distribution</div>
+                        <div class="viz-caption-desc">Illustrates the number of samples in each class within the
+                            dataset, showing the imbalance where certain attack types (like U2R and R2L) are
+                            significantly underrepresented.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. DATASET DETAILS -->
+        <div class="fade-in">
+            <div class="section-hdr">
+                <div class="section-title">🗄 Dataset Details</div>
+                <div class="section-sub">NSL-KDD · 41 Features · Multi-class</div>
+            </div>
+            <div class="dataset-intro">
+                The model is trained using the <strong style="color:var(--success)">NSL-KDD dataset</strong>, which is
+                widely used for evaluating
+                intrusion detection systems. It contains a total of <strong style="color:var(--success)">41
+                    features</strong> representing
+                various aspects of network traffic.
+            </div>
+            <div class="section-hdr" style="margin-bottom:12px;">
+                <div class="section-sub" style="font-size:12px;letter-spacing:1px;">FEATURE CATEGORIES</div>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-cat">
+                    <div class="fcat-name">📦 Basic Features</div>
+                    <div class="fcat-desc">Include fundamental connection attributes such as duration, protocol type,
+                        source bytes, and destination bytes.</div>
+                </div>
+                <div class="feature-cat">
+                    <div class="fcat-name">📶 Traffic Features</div>
+                    <div class="fcat-desc">Capture patterns within a time window, such as connection count and
+                        service-based statistics (e.g., count, same_srv_rate).</div>
+                </div>
+                <div class="feature-cat">
+                    <div class="fcat-name">🖥 Host-based Features</div>
+                    <div class="fcat-desc">Analyze connections to the same host over a longer duration, including
+                        features like dst_host_count and dst_host_srv_rate.</div>
+                </div>
+            </div>
+            <div class="imbalance-note">
+                ⚠ <strong>Class Imbalance:</strong> A key challenge in this dataset is class imbalance, where certain
+                attack types like
+                <strong>U2R</strong> (User to Root) and <strong>R2L</strong> (Remote to Local) have very few samples
+                compared to others.
+                This makes them harder to detect and necessitates the use of techniques like SMOTE.
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-name">&copy; 2026<span> — Arhat Salvi</span></div>
+        <div class="footer-tagline">// Real-Time Intrusion Detection for Secure Networks</div>
+        <div class="footer-links">
+            <a href="https://www.linkedin.com/in/arhat-salvi-a732a2297/" target="_blank" title="LinkedIn">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                </svg>
+            </a>
+            <a href="mailto:arhatsalvi88@gmail.com" title="Email">
+                <svg viewBox="0 0 24 24">
+                    <path
+                        d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-.904.732-1.636 1.636-1.636h.756L12 10.09l9.608-6.269h.756A1.636 1.636 0 0 1 24 5.457z" />
+                </svg>
+            </a>
+        </div>
+    </footer>
+    <div id="mtoast"
+        style="position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);padding:12px 20px;font-family:var(--mono);font-size:12px;color:var(--text);opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:99;">
+    </div>
+
+    <script>
+        let lastAlertId = -1;
+
+        function toast(msg, isError) {
+            const el = document.getElementById('mtoast');
+            el.textContent = msg;
+            el.style.borderLeftColor = isError ? 'var(--accent2)' : 'var(--accent)';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+            clearTimeout(el._t);
+            el._t = setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; }, 3000);
+        }
+
+        async function doLogout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        async function startDetection() {
+            try {
+                const r = await fetch('/api/start', { method: 'POST' });
+                const d = await r.json();
+                if (d.success) { toast('Sniffing started ▶'); updateStatus(true); }
+                else toast(d.error || 'Failed', true);
+            } catch { toast('Request failed', true); }
+        }
+
+        async function stopDetection() {
+            try {
+                const r = await fetch('/api/stop', { method: 'POST' });
+                const d = await r.json();
+                if (d.success) { toast('Sniffing stopped ■'); updateStatus(false); }
+            } catch { toast('Request failed', true); }
+        }
+
+        function updateStatus(running) {
+            const badge = document.getElementById('statusBadge');
+            const db = document.getElementById('drawerStatusBadge');
+            if (running) {
+                badge.textContent = '● LIVE'; badge.className = 'running';
+                db.textContent = '● LIVE'; db.className = 'running';
+            } else {
+                badge.textContent = '● IDLE'; badge.className = '';
+                db.textContent = '● IDLE'; db.className = '';
+            }
+        }
+
+        async function fetchStatus() {
+            try {
+                const r = await fetch('/api/status');
+                const d = await r.json();
+                updateStatus(d.running);
+            } catch { }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const r = await fetch('/api/alerts');
+                if (r.status === 401) { window.location.href = '/login'; return; }
+                const data = await r.json();
+
+                if (lastAlertId !== -1 && data.length > 0) {
+                    const newAlerts = data.filter(a => a.log_id > lastAlertId);
+                    if (newAlerts.length > 0) {
+                        const latest = newAlerts[0];
+                        toast(`Security Alert: ${latest.alert_type} Detected`, latest.severity_level === 'HIGH');
+                    }
+                }
+                if (data.length > 0) {
+                    const maxId = Math.max(...data.map(a => a.log_id));
+                    if (lastAlertId === -1 || maxId > lastAlertId) lastAlertId = maxId;
+                }
+            } catch (e) {
+                console.warn('fetchAlerts failed', e);
+            }
+        }
+
+        function openDrawer() {
+            document.getElementById('rightDrawer').classList.add('open');
+            document.getElementById('drawerOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDrawer() {
+            document.getElementById('rightDrawer').classList.remove('open');
+            document.getElementById('drawerOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+        // Initial status fetch + refresh every 5s
+        fetchStatus();
+        fetchAlerts();
+        setInterval(() => {
+            fetchStatus();
+            fetchAlerts();
+        }, 5000);
+    </script>
+
+</body>
+
+</html>
